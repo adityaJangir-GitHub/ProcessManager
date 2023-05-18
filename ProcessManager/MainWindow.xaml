@@ -6,31 +6,92 @@
         xmlns:local="clr-namespace:ProcessManager"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid x:Name="Grid">
+    <Grid Background="#FFF0F0F0">
+        <Grid.Resources>
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="Margin" Value="6,0"/>
+                <Setter Property="Padding" Value="8,4"/>
+                <Setter Property="MinWidth" Value="64"/>
+            </Style>
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="Margin" Value="4,0"/>
+            </Style>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Margin" Value="4,0"/>
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="75*"/>
-            <RowDefinition Height="359*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBox x:Name="NameFilter" TextChanged="OnTextChanged" HorizontalAlignment="Left" Margin="631,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="167" Height="28"/>
-        <Button x:Name="KillProcessButton" Content="Kill" Visibility="Hidden" Margin="345,32,376,10" />
-        <Button x:Name="RestartProcessButton" Content="Restart" Visibility="Hidden" RenderTransformOrigin="0.5,0.5" Margin="447,32,274,11"  >
-            <Button.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform AngleY="0"/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="0"/>
-                </TransformGroup>
-            </Button.RenderTransform>
-        </Button>
-        <ListView  x:Name="ProcessTable" SelectionChanged="AddKillOrRestartProcessButton" ItemsSource="{Binding Processes}" Margin="0,75,0,0" Grid.RowSpan="2">
-            <ListView.View>
-                <GridView >
-                    <GridViewColumn x:Name="SelectedProcessGrid" Header="Process Name" DisplayMemberBinding="{Binding ProcessName}" Width="150"/>
-                    <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="100"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <!--<MenuItem Header="Refresh" Click="OnRefreshButtonClick"/>-->
+                <!--<MenuItem Header="Quit" Click="OnQuitAppButtonClick"/>-->
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Current Lead">
+                    <!--<MenuItem Header="Edit" Click="OnEditLeadButtonClick"/>-->
+                    <!--<MenuItem Header="Delete" Click="OnRemoveLeadButtonClick"/>-->
+                </MenuItem>
+                <!--<MenuItem Header="New Lead" Click="OnNewLeadButtonClick"/>-->
+            </MenuItem>
+            <MenuItem Header="Window">
+                <!--<MenuItem Header="About" Click="OnAboutButtonClick"/>-->
+            </MenuItem>
+        </Menu>
+        <Border Grid.Row="1" Height="auto" Background="#FF073E64"/>
+        <Grid Grid.Row="1" Height="auto" Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Name="Filter" Grid.Column="0" VerticalContentAlignment="Center" TextChanged="Filter_OnTextChanged" KeyDown="OnFilterKeyDownHandler"/>
+            <Button Name="ClearFilter" HorizontalAlignment="Right" MinWidth="16" Background="Transparent" BorderThickness="0" Click="ClearFilter_OnClick" Margin="8,4">
+                <Path>
+                    <Path.Style>
+                        <Style TargetType="{x:Type Path}">
+                            <Setter Property="Data" Value="M11,0.7L10.3,0 5.5,4.8 0.7,0 0,0.7 4.8,5.5 0,10.3 0.7,11 5.5,6.2 10.3,11 11,10.3 6.2,5.5z" />
+                            <Setter Property="Width" Value="11" />
+                            <Setter Property="Height" Value="11" />
+                            <Setter Property="Fill" Value="Red"/>
+                        </Style>
+                    </Path.Style>
+                </Path>
+            </Button>
+            <Button Grid.Column="1" Content="Go" VerticalAlignment="Bottom" Click="OnFilterButtonClick"/>
 
+            <Button Grid.Column="4" Content="Kill" Click="OnKillProcessButtonClick"/>
+            <Button Grid.Column="5" Content="Restart" Click="OnRestartProcessButtonClick"/>
+        </Grid>
+        <DataGrid Name="DataGrid" Grid.Row="2" Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type Hyperlink}">
+                    <Setter Property="TextDecorations" Value="none"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=IsSelected}" Value="True">
+                            <Setter Property="TextBlock.Foreground" Value="White"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding ProcessName}" CanUserSort="True" />
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="CPU"  Width="Auto" CanUserSort="True"/>
+
+                <DataGridTextColumn Header="Memory" Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="Username"  Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="Discription" Width="Auto" CanUserSort="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
