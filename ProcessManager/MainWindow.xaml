@@ -1,0 +1,36 @@
+﻿<Window x:Class="ProcessManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProcessManager"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid x:Name="Grid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="75*"/>
+            <RowDefinition Height="359*"/>
+        </Grid.RowDefinitions>
+        <TextBox x:Name="NameFilter" TextChanged="OnTextChanged" HorizontalAlignment="Left" Margin="631,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="167" Height="28"/>
+        <Button x:Name="KillProcessButton" Content="Kill" Visibility="Hidden" Margin="345,32,376,10" />
+        <Button x:Name="RestartProcessButton" Content="Restart" Visibility="Hidden" RenderTransformOrigin="0.5,0.5" Margin="447,32,274,11"  >
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleY="0"/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="0"/>
+                </TransformGroup>
+            </Button.RenderTransform>
+        </Button>
+        <ListView  x:Name="ProcessTable" SelectionChanged="AddKillOrRestartProcessButton" ItemsSource="{Binding Processes}" Margin="0,75,0,0" Grid.RowSpan="2">
+            <ListView.View>
+                <GridView >
+                    <GridViewColumn x:Name="SelectedProcessGrid" Header="Process Name" DisplayMemberBinding="{Binding ProcessName}" Width="150"/>
+                    <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="100"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+    </Grid>
+</Window>
