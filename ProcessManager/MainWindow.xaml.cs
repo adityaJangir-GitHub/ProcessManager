@@ -55,7 +55,6 @@ namespace ProcessManager
         {
             if (e.Key != Key.Return) return;
             FilterAction(Filter.Text);
-
         }
         private void OnFilterButtonClick(object sender, TextChangedEventArgs e)
         {
@@ -103,6 +102,7 @@ namespace ProcessManager
             if (dialogResult == MessageBoxResult.Yes)
             {
                 Processes.Remove(process);
+                process.Kill();
             }
         }
 
@@ -118,7 +118,8 @@ namespace ProcessManager
             var dialogResult = MessageBox.Show(message, "Error", MessageBoxButton.YesNo);
             if (dialogResult == MessageBoxResult.Yes)
             {
-                Processes.Remove(process);
+                Process.Start(process.ProcessName);
+                process.Kill();
             }
         }
         private void LoadProcessesIntoGrid()
