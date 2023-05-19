@@ -72,7 +72,7 @@
             <Button Grid.Column="4" Content="Kill" Click="OnKillProcessButtonClick"/>
             <Button Grid.Column="5" Content="Restart" Click="OnRestartProcessButtonClick"/>
         </Grid>
-        <DataGrid Name="DataGrid" Grid.Row="2"  Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
+        <DataGrid Name="DataGrid" Grid.Row="2" MouseDown="RowSelected" Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type Hyperlink}">
                     <Setter Property="TextDecorations" Value="none"/>

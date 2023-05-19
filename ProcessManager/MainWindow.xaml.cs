@@ -30,6 +30,7 @@ namespace ProcessManager
         private ICollectionView filterSource;
         private Timer ProcessInfoUpdateTimer;
         private ObservableCollection<ProcessInfo> UpdatedProcesses;
+        private int _selectedRow;
 
 
         public MainWindow()
@@ -209,23 +210,13 @@ namespace ProcessManager
             var newPreocesses = UpdatedProcesses.Except(Processes).ToList();
             foreach(var newprocess  in newPreocesses)
                     Processes.Add(newprocess);
+            this.DataGrid.SelectedIndex = _selectedRow;
         }
-        //private ObservableCollection<ProcessInfo> ConvertProcessArrayToCollection(Process[] processes)
-        //{
-        //    var newProcess = new ObservableCollection<ProcessInfo>();
-        //    foreach (var process in processes)
-        //        newProcess.Add(new ProcessInfo()
-        //        {
-        //            ProcessName = process.ProcessName,
-        //            Id = process.Id,
-        //            Responsive = process.Responding,
-        //            Memory = process.PrivateMemorySize64 / 1000000,
-        //            CurrentState = process.MainWindowTitle
 
-        //        });
-        //    return newProcess;
-        //}
-
+        private void RowSelected(object sender, MouseButtonEventArgs e)
+        {
+            _selectedRow = DataGrid.SelectedIndex;
+        }
     }
     public class ProcessInfo
     {
