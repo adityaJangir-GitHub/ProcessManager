@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,22 +26,43 @@ namespace ProcessManager
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<Process> Processes { get; set; }
+        public ObservableCollection<ProcessInfo> Processes { get; set; }
         private ICollectionView filterSource;
+        private Timer ProcessInfoUpdateTimer;
+        private ObservableCollection<ProcessInfo> UpdatedProcesses;
+
+
         public MainWindow()
         {
             InitializeComponent();
             ClearFilter.Visibility = Visibility.Hidden;
+            Processes = new ObservableCollection<ProcessInfo>();
+            GetProcesses();
             LoadProcessesIntoGrid();
+
+            ProcessInfoUpdateTimer = new Timer();
+            ProcessInfoUpdateTimer.Interval = TimeSpan.FromSeconds(1).TotalMilliseconds;
+            ProcessInfoUpdateTimer.Elapsed += ProcessInfoUpdateTimerElapsed;
+
+            ProcessInfoUpdateTimer.Start();
         }
+
+        private void ProcessInfoUpdateTimerElapsed(object? sender, ElapsedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                UpdateProcesses();
+            }));
+        }
+
         private void FilterAction(string filterText)
         {
             filterSource.Filter = string.IsNullOrEmpty(filterText)
                 ? (Predicate<object>)null
-                : _ => _ is Process process && FilterProcess(process, filterText);
+                : _ => _ is ProcessInfo process && FilterProcess(process, filterText);
         }
 
-        private bool FilterProcess(Process process, string filterText)
+        private bool FilterProcess(ProcessInfo process, string filterText)
         {
             return ContainsIgnoreCase(process.ProcessName, filterText);
         }
@@ -51,22 +74,13 @@ namespace ProcessManager
                 ClearFilter.Visibility = Visibility.Visible;
             }
         }
+
         private void OnFilterKeyDownHandler(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Return) return;
             FilterAction(Filter.Text);
         }
-        private void OnFilterButtonClick(object sender, TextChangedEventArgs e)
-        {
-            //Processes.Clear();
-            //var filteredProcessName = Filter.Text;
-            //var processes = ProcessHelper.FilterProcessByName(filteredProcessName);
-            //foreach (var process in processes)
-            //    Processes.Add(process);
 
-            //DataGrid.BindingGroup;
-        }
-        
         private void ClearFilter_OnClick(object sender, RoutedEventArgs e)
         {
             Filter.Text = "";
@@ -91,7 +105,7 @@ namespace ProcessManager
 
         private void OnKillProcessButtonClick(object sender, RoutedEventArgs e)
         {
-            var process = (Process)DataGrid.SelectedItem;
+            var process = (ProcessInfo)DataGrid.SelectedItem;
             if (process == null)
             {
                 MessageBox.Show("Please select a process to kill.", "Error", MessageBoxButton.OK);
@@ -102,13 +116,15 @@ namespace ProcessManager
             if (dialogResult == MessageBoxResult.Yes)
             {
                 Processes.Remove(process);
-                process.Kill();
+                Process.GetProcessById(process.Id).Kill();
+                LoadProcessesIntoGrid();
             }
         }
 
         private void OnRestartProcessButtonClick(object sender, RoutedEventArgs e)
         {
-            var process = (Process)DataGrid.SelectedItem;
+            var process = (ProcessInfo)DataGrid.SelectedItem;
+
             if (process == null)
             {
                 MessageBox.Show("Please select a process to restart.", "Error", MessageBoxButton.OK);
@@ -119,18 +135,107 @@ namespace ProcessManager
             if (dialogResult == MessageBoxResult.Yes)
             {
                 Process.Start(process.ProcessName);
-                process.Kill();
+                Process.GetProcessById(process.Id).Kill();
             }
         }
+
         private void LoadProcessesIntoGrid()
         {
-            Processes = new ObservableCollection<Process>();
-            var currentProcess = Process.GetProcesses();
-            foreach (var process in currentProcess)
-                Processes.Add(process);
-
             DataGrid.ItemsSource = Processes;
             filterSource = CollectionViewSource.GetDefaultView(DataGrid.ItemsSource);
         }
+
+        private void GetProcesses()
+        {
+            var count = 1;
+            var currentProcesses = Process.GetProcesses();
+            if (Filter.Text != null)
+            {
+                foreach (var process in currentProcesses)
+                    if (ContainsIgnoreCase(process.ProcessName, Filter.Text))
+                        Processes.Add(new ProcessInfo()
+                        {
+                            SNo = count++,
+                            ProcessName = process.ProcessName,
+                            Id = process.Id,
+                            Responsive = process.Responding,
+                            Memory = process.PrivateMemorySize64 / 1000000,
+                            CurrentState = process.MainWindowTitle
+
+                        });
+            }
+            else
+            {
+                foreach (var process in currentProcesses)
+                    Processes.Add(new ProcessInfo()
+                    {
+                        ProcessName = process.ProcessName,
+                        Id = process.Id,
+                        Responsive = process.Responding,
+                        Memory = process.PrivateMemorySize64 / 1000000,
+                        CurrentState = process.MainWindowTitle
+
+                    });
+
+            }
+
+        }
+
+        private void UpdateProcesses()
+        {
+            var processesSnapShot = new ObservableCollection<ProcessInfo>();
+            foreach (var process in Processes)
+                processesSnapShot.Add(process);
+
+            UpdatedProcesses = new ObservableCollection<ProcessInfo>();
+            var count = 1;
+            foreach (var process in Process.GetProcesses())
+                UpdatedProcesses.Add(new ProcessInfo()
+                {
+                    SNo = count++,
+                    ProcessName = process.ProcessName,
+                    Id = process.Id,
+                    Responsive = process.Responding,
+                    Memory = process.PrivateMemorySize64 / 1000000,
+                    CurrentState = process.MainWindowTitle
+
+                });
+            var stoppedProcesse = Processes.Except(UpdatedProcesses).ToList();
+            foreach (var stpprocess in stoppedProcesse)
+                foreach(var process in processesSnapShot)
+                    if(process.Id == stpprocess.Id)
+                        Processes.Remove(process);
+
+            var newPreocesses = UpdatedProcesses.Except(Processes).ToList();
+            foreach(var newprocess  in newPreocesses)
+                    Processes.Add(newprocess);
+        }
+        //private ObservableCollection<ProcessInfo> ConvertProcessArrayToCollection(Process[] processes)
+        //{
+        //    var newProcess = new ObservableCollection<ProcessInfo>();
+        //    foreach (var process in processes)
+        //        newProcess.Add(new ProcessInfo()
+        //        {
+        //            ProcessName = process.ProcessName,
+        //            Id = process.Id,
+        //            Responsive = process.Responding,
+        //            Memory = process.PrivateMemorySize64 / 1000000,
+        //            CurrentState = process.MainWindowTitle
+
+        //        });
+        //    return newProcess;
+        //}
+
     }
+    public class ProcessInfo
+    {
+        public int SNo { get; set; }
+        public string ProcessName { get; set; }
+        public int Id { get; set; }
+        public bool Responsive { get; set; }
+        public long Memory { get; set; }
+        public string CurrentState { get; set; }
+
+    }
+
 }

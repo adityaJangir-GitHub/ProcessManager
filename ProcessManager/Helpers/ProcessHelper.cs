@@ -6,7 +6,7 @@ namespace ProcessManager.Helpers;
 
 public static class ProcessHelper
 {
-    public static List<Process> FilterProcessByName(string processName)
+    public static List<Process> GetProcesses(string processName)
     {
         var filteredProcess = new List<Process>();
         var allProcesses = Process.GetProcesses();

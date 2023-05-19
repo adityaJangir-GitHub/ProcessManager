@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProcessManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Process Manager" Height="450" Width="800">
     <Grid Background="#FFF0F0F0">
         <Grid.Resources>
             <Style TargetType="{x:Type Button}">
@@ -72,7 +72,7 @@
             <Button Grid.Column="4" Content="Kill" Click="OnKillProcessButtonClick"/>
             <Button Grid.Column="5" Content="Restart" Click="OnRestartProcessButtonClick"/>
         </Grid>
-        <DataGrid Name="DataGrid" Grid.Row="2" Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
+        <DataGrid Name="DataGrid" Grid.Row="2"  Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type Hyperlink}">
                     <Setter Property="TextDecorations" Value="none"/>
@@ -84,13 +84,13 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
+                <DataGridTextColumn Header="SNo" Binding="{Binding SNo}" CanUserSort="True" />
                 <DataGridTextColumn Header="Name" Binding="{Binding ProcessName}" CanUserSort="True" />
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="CPU"  Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="UI" Binding="{Binding Responding}" Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="Memory" Binding="{Binding Memory}"  Width="Auto" CanUserSort="True"/>
+                <DataGridTextColumn Header="Current State" Binding="{Binding CurrentState}"  Width="Auto" CanUserSort="True"/>
 
-                <DataGridTextColumn Header="Memory" Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="Username"  Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="Discription" Width="Auto" CanUserSort="True"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
