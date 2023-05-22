@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ProcessManager"
         mc:Ignorable="d"
         Title="Process Manager" Height="450" Width="800">
-    <Grid Background="#FFF0F0F0">
+    <Grid Background="MintCream">
         <Grid.Resources>
             <Style TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="6,0"/>
@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Menu HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <MenuItem Header="File">
@@ -42,7 +43,7 @@
                 <!--<MenuItem Header="About" Click="OnAboutButtonClick"/>-->
             </MenuItem>
         </Menu>
-        <Border Grid.Row="1" Height="auto" Background="#FF073E64"/>
+        <Border Grid.Row="1" Height="auto" Background="#B8B8B8"/>
         <Grid Grid.Row="1" Height="auto" Margin="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
@@ -72,7 +73,7 @@
             <Button Grid.Column="4" Content="Kill" Click="OnKillProcessButtonClick"/>
             <Button Grid.Column="5" Content="Restart" Click="OnRestartProcessButtonClick"/>
         </Grid>
-        <DataGrid Name="DataGrid" Grid.Row="2" MouseDown="RowSelected" Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="Auto">
+        <DataGrid Name="DataGrid" Grid.Row="2" MouseDown="RowSelected" Background="White" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Visible" AutoGenerateColumns="False" IsReadOnly="True" Margin="10" Width="800">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type Hyperlink}">
                     <Setter Property="TextDecorations" Value="none"/>
@@ -84,14 +85,23 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="SNo" Binding="{Binding SNo}" CanUserSort="True" />
-                <DataGridTextColumn Header="Name" Binding="{Binding ProcessName}" CanUserSort="True" />
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="UI" Binding="{Binding Responding}" Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="Memory" Binding="{Binding Memory}"  Width="Auto" CanUserSort="True"/>
-                <DataGridTextColumn Header="Current State" Binding="{Binding CurrentState}"  Width="Auto" CanUserSort="True"/>
-
+                <DataGridTextColumn Header="Name" Binding="{Binding ProcessName}" CanUserSort="True" Width="200" />
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="75" CanUserSort="True" />
+                <DataGridTextColumn Header="UI" Binding="{Binding Responding}" Width="50" CanUserSort="True"/>
+                <DataGridTextColumn Header="Memory" Binding="{Binding PrivateMemorySize64}"  Width="75" CanUserSort="True"/>
+                <DataGridTextColumn Header="Current State" Binding="{Binding MainWindowTitle}"  Width="400" CanUserSort="True"/>
             </DataGrid.Columns>
         </DataGrid>
+        <Border Grid.Row="5" Height="auto" Background="#B8B8B8"/>
+        <Grid Grid.Row="5" Height="auto" Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="162"/>
+                <ColumnDefinition Width="366"/>
+                <ColumnDefinition Width="272"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name ="SystemProcesserCount" Grid.Column="0" FontSize="16" FontWeight="DemiBold" HorizontalAlignment="Left"/>
+            <TextBlock x:Name ="OSVersion" Grid.Column="1" FontSize="16" FontWeight="DemiBold" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Text="Developed by : Aditya Jangir"  FontSize="16" FontWeight="DemiBold" HorizontalAlignment="Center"/>
+        </Grid>
     </Grid>
 </Window>

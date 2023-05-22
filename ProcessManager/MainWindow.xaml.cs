@@ -1,22 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ProcessManager
 {
@@ -25,20 +16,21 @@ namespace ProcessManager
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<ProcessInfo> Processes { get; set; }
+        public List<Process> Processes { get; set; }
         private ICollectionView filterSource;
         private Timer ProcessInfoUpdateTimer;
-        private ObservableCollection<ProcessInfo> UpdatedProcesses;
-        private int _selectedRow;
+        private int _selectedIndex;
 
 
         public MainWindow()
         {
             InitializeComponent();
             ClearFilter.Visibility = Visibility.Hidden;
-            Processes = new ObservableCollection<ProcessInfo>();
             GetProcesses();
             LoadProcessesIntoGrid();
+
+            SystemProcesserCount.Text = $"Logical Processor : {Environment.ProcessorCount}";
+            OSVersion.Text = $"OS Version : {Environment.OSVersion}";
 
             ProcessInfoUpdateTimer = new Timer();
             ProcessInfoUpdateTimer.Interval = TimeSpan.FromSeconds(1).TotalMilliseconds;
@@ -59,10 +51,10 @@ namespace ProcessManager
         {
             filterSource.Filter = string.IsNullOrEmpty(filterText)
                 ? (Predicate<object>)null
-                : _ => _ is ProcessInfo process && FilterProcess(process, filterText);
+                : _ => _ is Process process && FilterProcess(process, filterText);
         }
 
-        private bool FilterProcess(ProcessInfo process, string filterText)
+        private bool FilterProcess(Process process, string filterText)
         {
             return ContainsIgnoreCase(process.ProcessName, filterText);
         }
@@ -105,7 +97,7 @@ namespace ProcessManager
 
         private void OnKillProcessButtonClick(object sender, RoutedEventArgs e)
         {
-            var process = (ProcessInfo)DataGrid.SelectedItem;
+            var process = (Process)DataGrid.SelectedItem;
             if (process == null)
             {
                 MessageBox.Show("Please select a process to kill.", "Error", MessageBoxButton.OK);
@@ -123,7 +115,7 @@ namespace ProcessManager
 
         private void OnRestartProcessButtonClick(object sender, RoutedEventArgs e)
         {
-            var process = (ProcessInfo)DataGrid.SelectedItem;
+            var process = (Process)DataGrid.SelectedItem;
 
             if (process == null)
             {
@@ -147,85 +139,54 @@ namespace ProcessManager
 
         private void GetProcesses()
         {
-            var count = 1;
-            var currentProcesses = Process.GetProcesses();
-            if (Filter.Text != null)
-            {
-                foreach (var process in currentProcesses)
-                    if (ContainsIgnoreCase(process.ProcessName, Filter.Text))
-                        Processes.Add(new ProcessInfo()
-                        {
-                            SNo = count++,
-                            ProcessName = process.ProcessName,
-                            Id = process.Id,
-                            Responsive = process.Responding,
-                            Memory = process.PrivateMemorySize64 / 1000000,
-                            CurrentState = process.MainWindowTitle
-
-                        });
-            }
-            else
-            {
-                foreach (var process in currentProcesses)
-                    Processes.Add(new ProcessInfo()
-                    {
-                        ProcessName = process.ProcessName,
-                        Id = process.Id,
-                        Responsive = process.Responding,
-                        Memory = process.PrivateMemorySize64 / 1000000,
-                        CurrentState = process.MainWindowTitle
-
-                    });
-
-            }
-
+            Processes = Process.GetProcesses().ToList();
         }
 
         private void UpdateProcesses()
         {
-            var processesSnapShot = new ObservableCollection<ProcessInfo>();
+            var processesSnapShot = new List<Process>();
             foreach (var process in Processes)
                 processesSnapShot.Add(process);
 
-            UpdatedProcesses = new ObservableCollection<ProcessInfo>();
-            var count = 1;
-            foreach (var process in Process.GetProcesses())
-                UpdatedProcesses.Add(new ProcessInfo()
-                {
-                    SNo = count++,
-                    ProcessName = process.ProcessName,
-                    Id = process.Id,
-                    Responsive = process.Responding,
-                    Memory = process.PrivateMemorySize64 / 1000000,
-                    CurrentState = process.MainWindowTitle
+            var UpdatedProcesses = Process.GetProcesses().ToList();
 
-                });
-            var stoppedProcesse = Processes.Except(UpdatedProcesses).ToList();
-            foreach (var stpprocess in stoppedProcesse)
-                foreach(var process in processesSnapShot)
-                    if(process.Id == stpprocess.Id)
+            var closedProcesses = Processes.Except(UpdatedProcesses).ToList();
+
+            foreach (var closedProcess in closedProcesses)
+                foreach (var process in processesSnapShot)
+                    if (process.Id == closedProcess.Id)
                         Processes.Remove(process);
 
-            var newPreocesses = UpdatedProcesses.Except(Processes).ToList();
-            foreach(var newprocess  in newPreocesses)
-                    Processes.Add(newprocess);
-            this.DataGrid.SelectedIndex = _selectedRow;
+            Processes.AddRange(UpdatedProcesses.Except(Processes).ToList());
+
+            DataGrid.SelectedIndex = _selectedIndex;
         }
 
         private void RowSelected(object sender, MouseButtonEventArgs e)
         {
-            _selectedRow = DataGrid.SelectedIndex;
+            _selectedIndex = DataGrid.SelectedIndex;
         }
-    }
-    public class ProcessInfo
-    {
-        public int SNo { get; set; }
-        public string ProcessName { get; set; }
-        public int Id { get; set; }
-        public bool Responsive { get; set; }
-        public long Memory { get; set; }
-        public string CurrentState { get; set; }
 
     }
+    //public class ProcessInfo
+    //{
+    //    public Icon Icon { get; set; } = default;
+    //    public string ProcessName { get; set; }
+    //    public int Id { get; set; }
+    //    public bool Responsive { get; set; }
+    //    public long Memory { get; set; }
+    //    public string CurrentState { get; set; }
+
+    //    public ProcessInfo(Process process)
+    //    {
+    //        try
+    //        {
+    //        }
+    //        catch { }
+
+    //    }
+
+
+    //}
 
 }
